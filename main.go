@@ -77,7 +77,13 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 \$$$$$$  |\$$$$$$  |$$ |  $$ |        \$$$$$$  |\$$$$$$$ |$$ |      \$$$$$$$ |\$$$$$$$\ $$ |  $$ |
  \______/  \______/ \__|  \__|         \______/  \_______|\__|       \_______| \_______|\__|  \__|`
 
-	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, title)
+	options := `[q] Quit`
+
+	coloredTitle := lipgloss.NewStyle().Foreground(lipgloss.Color("#2c7450")).Render(title)
+
+	fullMenu := lipgloss.JoinVertical(lipgloss.Center, coloredTitle, " ", options)
+
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, fullMenu)
 }
 
 func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
