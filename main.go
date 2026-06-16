@@ -5,6 +5,7 @@ import (
 	"net"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/charmbracelet/ssh"
 	"github.com/charmbracelet/wish"
@@ -39,7 +40,10 @@ func main() {
 	}
 }
 
-type model struct{}
+type model struct {
+	width  int
+	height int
+}
 
 func (m model) Init() tea.Cmd {
 	return nil
@@ -54,14 +58,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+z":
 			return m, tea.Suspend
 		}
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
 	}
+
 	return m, nil
 }
 
 func (m model) View() string {
-	return "Welcome to SSH Garden"
+	title := `
+$$$$$$\   $$$$$$\  $$\   $$\          $$$$$$\                            $$\                     
+$$  __$$\ $$  __$$\ $$ |  $$ |        $$  __$$\                           $$ |                    
+$$ /  \__|$$ /  \__|$$ |  $$ |        $$ /  \__| $$$$$$\   $$$$$$\   $$$$$$$ | $$$$$$\  $$$$$$$\  
+\$$$$$$\  \$$$$$$\  $$$$$$$$ |$$$$$$\ $$ |$$$$\  \____$$\ $$  __$$\ $$  __$$ |$$  __$$\ $$  __$$\ 
+ \____$$\  \____$$\ $$  __$$ |\______|$$ |\_$$ | $$$$$$$ |$$ |  \__|$$ /  $$ |$$$$$$$$ |$$ |  $$ |
+$$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$   ____|$$ |  $$ |
+\$$$$$$  |\$$$$$$  |$$ |  $$ |        \$$$$$$  |\$$$$$$$ |$$ |      \$$$$$$$ |\$$$$$$$\ $$ |  $$ |
+ \______/  \______/ \__|  \__|         \______/  \_______|\__|       \_______| \_______|\__|  \__|`
+
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, title)
 }
 
 func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
-	return model{}, []tea.ProgramOption{}
+	return model{}, []tea.ProgramOption{tea.WithAltScreen()}
 }
