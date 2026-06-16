@@ -41,9 +41,17 @@ func main() {
 }
 
 type model struct {
-	width  int
-	height int
+	width         int
+	height        int
+	currentScreen screen
 }
+
+type screen int
+
+const (
+	titleScreen screen = iota
+	gardenScreen
+)
 
 func (m model) Init() tea.Cmd {
 	return nil
@@ -57,6 +65,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "ctrl+z":
 			return m, tea.Suspend
+		case "s":
+			m.currentScreen = gardenScreen
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -67,7 +77,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	title := `
+	var content string
+	switch m.currentScreen {
+	case titleScreen:
+		title := `
 $$$$$$\   $$$$$$\  $$\   $$\          $$$$$$\                            $$\                     
 $$  __$$\ $$  __$$\ $$ |  $$ |        $$  __$$\                           $$ |                    
 $$ /  \__|$$ /  \__|$$ |  $$ |        $$ /  \__| $$$$$$\   $$$$$$\   $$$$$$$ | $$$$$$\  $$$$$$$\  
@@ -77,13 +90,19 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 \$$$$$$  |\$$$$$$  |$$ |  $$ |        \$$$$$$  |\$$$$$$$ |$$ |      \$$$$$$$ |\$$$$$$$\ $$ |  $$ |
  \______/  \______/ \__|  \__|         \______/  \_______|\__|       \_______| \_______|\__|  \__|`
 
-	options := `[q] Quit`
+		options := `[q] Quit [s] Start`
 
-	coloredTitle := lipgloss.NewStyle().Foreground(lipgloss.Color("#2c7450")).Render(title)
+		coloredTitle := lipgloss.NewStyle().Foreground(lipgloss.Color("#2c7450")).Render(title)
+		coloredOptions := lipgloss.NewStyle().Foreground(lipgloss.Color("#4484f2")).Render(options)
+		fullMenu := lipgloss.JoinVertical(lipgloss.Center, coloredTitle, "\n-------------------------------------\n", coloredOptions)
 
-	fullMenu := lipgloss.JoinVertical(lipgloss.Center, coloredTitle, " ", options)
+		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, fullMenu)
 
-	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, fullMenu)
+	case gardenScreen:
+		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, "Garden coming soon...")
+	}
+
+	return content
 }
 
 func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
