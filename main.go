@@ -44,6 +44,7 @@ type model struct {
 	width         int
 	height        int
 	currentScreen screen
+	gardenGrid    [][]rune
 }
 
 type screen int
@@ -99,12 +100,29 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, fullMenu)
 
 	case gardenScreen:
-		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, "Garden coming soon...")
+		grid := ""
+
+		for y := 0; y < len(m.gardenGrid); y++ {
+			for x := 0; x < len(m.gardenGrid[y]); x++ {
+				grid += "[" + string(m.gardenGrid[y][x]) + "]"
+			}
+			grid += "\n"
+		}
+
+		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, grid)
 	}
 
 	return content
 }
 
 func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
-	return model{}, []tea.ProgramOption{tea.WithAltScreen()}
+	grid := [][]rune{}
+	for y := 0; y < 5; y++ {
+		row := []rune{}
+		for x := 0; x < 5; x++ {
+			row = append(row, '.')
+		}
+		grid = append(grid, row)
+	}
+	return model{gardenGrid: grid}, []tea.ProgramOption{tea.WithAltScreen()}
 }
