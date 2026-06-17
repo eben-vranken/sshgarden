@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"net"
+	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -16,6 +18,14 @@ import (
 const (
 	host = "localhost"
 	port = "23234"
+)
+
+const (
+	topbarHeight     = 2
+	sidebarFullWidth = 20
+	cellWidth        = 3
+	cellHeight       = 1
+	gutterWidth      = 12
 )
 
 func main() {
@@ -51,6 +61,19 @@ type model struct {
 	currentScreen screen
 	gardenGrid    [][]rune
 	mousePosition coordinate
+	gridStartX    int
+	gridStartY    int
+	sidebarOpen   bool
+	selectedPlot  coordinate
+	currentTime   time.Time
+}
+
+type tickMsg time.Time
+
+func tick() tea.Cmd {
+	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+		return tickMsg(t)
+	})
 }
 
 type screen int
@@ -61,7 +84,7 @@ const (
 )
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return tick()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -78,6 +101,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+
+		m.recomputeGrid()
+
+	case tea.MouseMsg:
+		switch msg.Action {
+		case tea.MouseActionMotion:
+			m.mousePosition.x = (msg.X - m.gridStartX) / cellWidth
+			m.mousePosition.y = (msg.Y - m.gridStartY) / cellHeight
+		case tea.MouseActionPress:
+			if msg.Button == tea.MouseButtonLeft {
+				m.sidebarOpen = true
+				m.selectedPlot = coordinate{
+					x: (msg.X - m.gridStartX) / cellWidth,
+					y: (msg.Y - m.gridStartY) / cellHeight,
+				}
+				m.recomputeGrid()
+			}
+		}
+	case tickMsg:
+		m.currentTime = time.Time(msg)
+		return m, tick()
 	}
 
 	return m, nil
@@ -106,23 +150,33 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, fullMenu)
 
 	case gardenScreen:
-		topBar := "SSH Garden"
-		sideBar := "Sidebar"
+		clock := m.currentTime.Format("15:04:05")
+		leftGutter := lipgloss.NewStyle().Width(gutterWidth).Align(lipgloss.Left).Render(clock)
+		rightGutter := lipgloss.NewStyle().Width(gutterWidth).Align(lipgloss.Right).Render("")
+		center := lipgloss.NewStyle().Width(m.width - 2*gutterWidth).Align(lipgloss.Center).Render("SSH Garden")
+		topBar := lipgloss.JoinHorizontal(lipgloss.Center, leftGutter, center, rightGutter)
+		sideBar := ""
 
-		topbarHeight := 2
-		sidebarWidth := 20
+		var sidebarWidth int
+
+		if m.sidebarOpen {
+			sidebarWidth = sidebarFullWidth
+		}
+
 		sidebarHeight := m.height - topbarHeight
 		gardenWidth := m.width - sidebarWidth
 		gardenHeight := m.height - topbarHeight
 
-		grid := ""
+		var gridBuilder strings.Builder
 
 		for y := 0; y < len(m.gardenGrid); y++ {
 			for x := 0; x < len(m.gardenGrid[y]); x++ {
-				grid += "[" + string(m.gardenGrid[y][x]) + "]"
+				gridBuilder.WriteString("[" + string(m.gardenGrid[y][x]) + "]")
 			}
-			grid += "\n"
+			gridBuilder.WriteString("\n")
 		}
+
+		grid := gridBuilder.String()
 
 		styledGarden := lipgloss.NewStyle().Width(gardenWidth).Height(gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
 		styledSidebar := lipgloss.NewStyle().Width(sidebarWidth).Height(sidebarHeight).Border(lipgloss.ASCIIBorder(), false, false, false, true).Render(sideBar)
@@ -138,12 +192,26 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 
 func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	grid := [][]rune{}
-	for y := 0; y < 5; y++ {
+	for range 5 {
 		row := []rune{}
-		for x := 0; x < 5; x++ {
-			row = append(row, '.')
+		for range 5 {
+			row = append(row, ' ')
 		}
 		grid = append(grid, row)
 	}
-	return model{gardenGrid: grid}, []tea.ProgramOption{tea.WithAltScreen()}
+	return model{gardenGrid: grid, sidebarOpen: false, currentTime: time.Now()}, []tea.ProgramOption{tea.WithAltScreen(), tea.WithMouseAllMotion()}
+}
+
+func (m *model) recomputeGrid() {
+	var sidebarWidth int
+
+	if m.sidebarOpen {
+		sidebarWidth = sidebarFullWidth
+	}
+
+	gardenWidth := m.width - sidebarWidth
+	gardenHeight := m.height - topbarHeight
+
+	m.gridStartX = (gardenWidth - len(m.gardenGrid[0])*cellWidth) / 2
+	m.gridStartY = topbarHeight + (gardenHeight-len(m.gardenGrid)*cellHeight)/2
 }
