@@ -105,18 +105,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.recomputeGrid()
 
 	case tea.MouseMsg:
+		if m.currentScreen != gardenScreen {
+			break
+		}
+
 		switch msg.Action {
 		case tea.MouseActionMotion:
 			m.mousePosition.x = (msg.X - m.gridStartX) / cellWidth
 			m.mousePosition.y = (msg.Y - m.gridStartY) / cellHeight
 		case tea.MouseActionPress:
 			if msg.Button == tea.MouseButtonLeft {
-				m.sidebarOpen = true
-				m.selectedPlot = coordinate{
-					x: (msg.X - m.gridStartX) / cellWidth,
-					y: (msg.Y - m.gridStartY) / cellHeight,
+				col := (msg.X - m.gridStartX) / cellWidth
+				row := (msg.Y - m.gridStartY) / cellHeight
+				if msg.X >= m.gridStartX && msg.Y >= m.gridStartY {
+					if col >= 0 && col < len(m.gardenGrid[0]) && row >= 0 && row < len(m.gardenGrid) {
+						m.sidebarOpen = true
+						m.selectedPlot = coordinate{
+							x: (msg.X - m.gridStartX) / cellWidth,
+							y: (msg.Y - m.gridStartY) / cellHeight,
+						}
+						m.recomputeGrid()
+					}
 				}
-				m.recomputeGrid()
 			}
 		}
 	case tickMsg:
