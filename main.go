@@ -40,11 +40,17 @@ func main() {
 	}
 }
 
+type coordinate struct {
+	x int
+	y int
+}
+
 type model struct {
 	width         int
 	height        int
 	currentScreen screen
 	gardenGrid    [][]rune
+	mousePosition coordinate
 }
 
 type screen int
@@ -100,6 +106,15 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, fullMenu)
 
 	case gardenScreen:
+		topBar := "SSH Garden"
+		sideBar := "Sidebar"
+
+		topbarHeight := 2
+		sidebarWidth := 20
+		sidebarHeight := m.height - topbarHeight
+		gardenWidth := m.width - sidebarWidth
+		gardenHeight := m.height - topbarHeight
+
 		grid := ""
 
 		for y := 0; y < len(m.gardenGrid); y++ {
@@ -109,7 +124,13 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 			grid += "\n"
 		}
 
-		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, grid)
+		styledGarden := lipgloss.NewStyle().Width(gardenWidth).Height(gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
+		styledSidebar := lipgloss.NewStyle().Width(sidebarWidth).Height(sidebarHeight).Border(lipgloss.ASCIIBorder(), false, false, false, true).Render(sideBar)
+		styledTopbar := lipgloss.NewStyle().Width(m.width).Border(lipgloss.ASCIIBorder(), false, false, true, false).Align(lipgloss.Center).Render(topBar)
+
+		centerArea := lipgloss.JoinHorizontal(lipgloss.Top, styledGarden, styledSidebar)
+		content = lipgloss.JoinVertical(lipgloss.Left, styledTopbar, centerArea)
+
 	}
 
 	return content
