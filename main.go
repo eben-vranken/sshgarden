@@ -188,20 +188,31 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 		var gridBuilder strings.Builder
 
 		for y := 0; y < len(m.gardenGrid); y++ {
+			if y > 0 {
+				gridBuilder.WriteString("\n")
+			}
 			for x := 0; x < len(m.gardenGrid[y]); x++ {
 				gridBuilder.WriteString("[" + string(m.gardenGrid[y][x]) + "]")
 			}
-			gridBuilder.WriteString("\n")
 		}
 
 		grid := gridBuilder.String()
 
 		styledGarden := lipgloss.NewStyle().Width(gardenWidth).Height(gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
-		styledSidebar := lipgloss.NewStyle().Width(sidebarWidth-1).Height(sidebarHeight).Border(lipgloss.NormalBorder(), false, false, false, true).Align(lipgloss.Right).Render(sideBar)
-		styledTopbar := lipgloss.NewStyle().Width(m.width).Border(lipgloss.NormalBorder(), false, false, true, false).Align(lipgloss.Center).Render(topBar)
+		styledTopbar := lipgloss.NewStyle().Width(m.width).Align(lipgloss.Center).Render(topBar)
 
-		centerArea := lipgloss.JoinHorizontal(lipgloss.Top, styledGarden, styledSidebar)
-		content = lipgloss.JoinVertical(lipgloss.Left, styledTopbar, centerArea)
+		var separator string
+		var centerArea string
+		if m.sidebarOpen {
+			separator = strings.Repeat("═", gardenWidth) + "╦" + strings.Repeat("═", m.width-gardenWidth-1)
+			styledSidebar := lipgloss.NewStyle().Width(sidebarWidth-1).Height(sidebarHeight).Border(lipgloss.DoubleBorder(), false, false, false, true).Align(lipgloss.Right).Render(sideBar)
+			centerArea = lipgloss.JoinHorizontal(lipgloss.Top, styledGarden, styledSidebar)
+		} else {
+			separator = strings.Repeat("═", m.width)
+			centerArea = styledGarden
+		}
+
+		content = lipgloss.JoinVertical(lipgloss.Left, styledTopbar, separator, centerArea)
 
 	}
 
