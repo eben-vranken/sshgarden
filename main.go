@@ -28,6 +28,25 @@ const (
 	gutterWidth      = 12
 )
 
+const (
+	colorBlack       = lipgloss.Color("#09050a")
+	colorPurple      = lipgloss.Color("#282439")
+	colorGray        = lipgloss.Color("#3b3d43")
+	colorBrown       = lipgloss.Color("#704c57")
+	colorGrayGreen   = lipgloss.Color("#7a8074")
+	colorLightPurple = lipgloss.Color("#a591b7")
+	colorBeige       = lipgloss.Color("#cec5bb")
+	colorOffWhite    = lipgloss.Color("#f2efe4")
+	colorRedOrange   = lipgloss.Color("#b45a43")
+	colorOrange      = lipgloss.Color("#cea33d")
+	colorYellow      = lipgloss.Color("#e4d650")
+	colorLightGreen  = lipgloss.Color("#49ae44")
+	colorDarkGreen   = lipgloss.Color("#2c7450")
+	colorDarkBlue    = lipgloss.Color("#34469e")
+	colorLightBlue   = lipgloss.Color("#4484f2")
+	colorCyan        = lipgloss.Color("#85bbff")
+)
+
 func main() {
 	srv, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort(host, port)),
@@ -158,8 +177,8 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 
 		options := `[q] Quit [s] Start`
 
-		coloredTitle := lipgloss.NewStyle().Foreground(lipgloss.Color("#2c7450")).Render(title)
-		coloredOptions := lipgloss.NewStyle().Foreground(lipgloss.Color("#4484f2")).Render(options)
+		coloredTitle := lipgloss.NewStyle().Foreground(colorDarkGreen).Render(title)
+		coloredOptions := lipgloss.NewStyle().Foreground(colorLightBlue).Render(options)
 		fullMenu := lipgloss.JoinVertical(lipgloss.Center, coloredTitle, "\n-------------------------------------\n", coloredOptions)
 
 		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, fullMenu)
@@ -167,9 +186,9 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 	case gardenScreen:
 		// Topbar
 		clock := m.currentTime.Format("15:04:05")
-		leftGutter := lipgloss.NewStyle().Width(gutterWidth).Align(lipgloss.Left).Render(clock)
+		leftGutter := lipgloss.NewStyle().Width(gutterWidth).Align(lipgloss.Left).Foreground(colorBeige).Render(clock)
 		rightGutter := lipgloss.NewStyle().Width(gutterWidth).Align(lipgloss.Right).Render("")
-		center := lipgloss.NewStyle().Width(m.width - 2*gutterWidth).Align(lipgloss.Center).Render("SSH Garden")
+		center := lipgloss.NewStyle().Width(m.width - 2*gutterWidth).Align(lipgloss.Center).Foreground(colorLightGreen).Bold(true).Render("SSH Garden")
 		topBar := lipgloss.JoinHorizontal(lipgloss.Center, leftGutter, center, rightGutter)
 
 		// Sidebar
@@ -179,7 +198,7 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 			sidebarWidth = sidebarFullWidth
 		}
 
-		sideBar := "X"
+		sideBar := lipgloss.NewStyle().Foreground(colorRedOrange).Bold(true).Render("X")
 
 		sidebarHeight := m.height - topbarHeight
 		gardenWidth := m.width - sidebarWidth
@@ -198,19 +217,21 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 
 		grid := gridBuilder.String()
 
-		styledGarden := lipgloss.NewStyle().Width(gardenWidth).Height(gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
+		styledGarden := lipgloss.NewStyle().Width(gardenWidth).Height(gardenHeight).Align(lipgloss.Center, lipgloss.Center).Foreground(colorGrayGreen).Render(grid)
 		styledTopbar := lipgloss.NewStyle().Width(m.width).Align(lipgloss.Center).Render(topBar)
 
 		var separator string
 		var centerArea string
 		if m.sidebarOpen {
 			separator = strings.Repeat("═", gardenWidth) + "╦" + strings.Repeat("═", m.width-gardenWidth-1)
-			styledSidebar := lipgloss.NewStyle().Width(sidebarWidth-1).Height(sidebarHeight).Border(lipgloss.DoubleBorder(), false, false, false, true).Align(lipgloss.Right).Render(sideBar)
+			styledSidebar := lipgloss.NewStyle().Width(sidebarWidth-1).Height(sidebarHeight).Border(lipgloss.DoubleBorder(), false, false, false, true).BorderForeground(colorGray).Align(lipgloss.Right).Render(sideBar)
 			centerArea = lipgloss.JoinHorizontal(lipgloss.Top, styledGarden, styledSidebar)
 		} else {
 			separator = strings.Repeat("═", m.width)
 			centerArea = styledGarden
 		}
+
+		separator = lipgloss.NewStyle().Foreground(colorGray).Render(separator)
 
 		content = lipgloss.JoinVertical(lipgloss.Left, styledTopbar, separator, centerArea)
 
