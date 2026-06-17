@@ -115,16 +115,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.mousePosition.y = (msg.Y - m.gridStartY) / cellHeight
 		case tea.MouseActionPress:
 			if msg.Button == tea.MouseButtonLeft {
-				col := (msg.X - m.gridStartX) / cellWidth
-				row := (msg.Y - m.gridStartY) / cellHeight
-				if msg.X >= m.gridStartX && msg.Y >= m.gridStartY {
-					if col >= 0 && col < len(m.gardenGrid[0]) && row >= 0 && row < len(m.gardenGrid) {
-						m.sidebarOpen = true
-						m.selectedPlot = coordinate{
-							x: (msg.X - m.gridStartX) / cellWidth,
-							y: (msg.Y - m.gridStartY) / cellHeight,
+				if m.sidebarOpen && msg.X == m.width-1 && msg.Y == topbarHeight {
+					m.sidebarOpen = false
+					m.recomputeGrid()
+				} else {
+					col := (msg.X - m.gridStartX) / cellWidth
+					row := (msg.Y - m.gridStartY) / cellHeight
+					if msg.X >= m.gridStartX && msg.Y >= m.gridStartY {
+						if col >= 0 && col < len(m.gardenGrid[0]) && row >= 0 && row < len(m.gardenGrid) {
+							m.sidebarOpen = true
+							m.selectedPlot = coordinate{
+								x: (msg.X - m.gridStartX) / cellWidth,
+								y: (msg.Y - m.gridStartY) / cellHeight,
+							}
+							m.recomputeGrid()
 						}
-						m.recomputeGrid()
 					}
 				}
 			}
@@ -160,18 +165,21 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 		content = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, fullMenu)
 
 	case gardenScreen:
+		// Topbar
 		clock := m.currentTime.Format("15:04:05")
 		leftGutter := lipgloss.NewStyle().Width(gutterWidth).Align(lipgloss.Left).Render(clock)
 		rightGutter := lipgloss.NewStyle().Width(gutterWidth).Align(lipgloss.Right).Render("")
 		center := lipgloss.NewStyle().Width(m.width - 2*gutterWidth).Align(lipgloss.Center).Render("SSH Garden")
 		topBar := lipgloss.JoinHorizontal(lipgloss.Center, leftGutter, center, rightGutter)
-		sideBar := ""
 
+		// Sidebar
 		var sidebarWidth int
 
 		if m.sidebarOpen {
 			sidebarWidth = sidebarFullWidth
 		}
+
+		sideBar := "X"
 
 		sidebarHeight := m.height - topbarHeight
 		gardenWidth := m.width - sidebarWidth
@@ -189,8 +197,8 @@ $$\   $$ |$$\   $$ |$$ |  $$ |        $$ |  $$ |$$  __$$ |$$ |      $$ |  $$ |$$
 		grid := gridBuilder.String()
 
 		styledGarden := lipgloss.NewStyle().Width(gardenWidth).Height(gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
-		styledSidebar := lipgloss.NewStyle().Width(sidebarWidth).Height(sidebarHeight).Border(lipgloss.ASCIIBorder(), false, false, false, true).Render(sideBar)
-		styledTopbar := lipgloss.NewStyle().Width(m.width).Border(lipgloss.ASCIIBorder(), false, false, true, false).Align(lipgloss.Center).Render(topBar)
+		styledSidebar := lipgloss.NewStyle().Width(sidebarWidth-1).Height(sidebarHeight).Border(lipgloss.NormalBorder(), false, false, false, true).Align(lipgloss.Right).Render(sideBar)
+		styledTopbar := lipgloss.NewStyle().Width(m.width).Border(lipgloss.NormalBorder(), false, false, true, false).Align(lipgloss.Center).Render(topBar)
 
 		centerArea := lipgloss.JoinHorizontal(lipgloss.Top, styledGarden, styledSidebar)
 		content = lipgloss.JoinVertical(lipgloss.Left, styledTopbar, centerArea)
