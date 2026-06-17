@@ -17,8 +17,6 @@ type model struct {
 	currentScreen screen
 	gardenGrid    [][]rune
 	mousePosition coordinate
-	gridStartX    int
-	gridStartY    int
 	sidebarOpen   bool
 	selectedPlot  coordinate
 	currentTime   time.Time
