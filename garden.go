@@ -67,8 +67,6 @@ func (g gardenModel) View() string {
 	center := lipgloss.NewStyle().Width(g.width - 2*gutterWidth).Align(lipgloss.Center).Foreground(colorLightGreen).Bold(true).Render("SSH Garden")
 	topBar := lipgloss.JoinHorizontal(lipgloss.Center, leftGutter, center, rightGutter)
 
-	sideBar := lipgloss.NewStyle().Foreground(colorRedOrange).Bold(true).Render("X")
-
 	var gridBuilder strings.Builder
 
 	for y := 0; y < len(g.gardenGrid); y++ {
@@ -94,11 +92,16 @@ func (g gardenModel) View() string {
 	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
 	styledTopbar := lipgloss.NewStyle().Width(g.width).Align(lipgloss.Center).Render(topBar)
 
+	header := lipgloss.NewStyle().Width(l.sidebarWidth - 1).Align(lipgloss.Right).Foreground(colorRedOrange).Bold(true).Render("X")
+	body := lipgloss.NewStyle().Foreground(colorBeige).Render(g.renderSidebarBody())
+
+	sidebar := lipgloss.JoinVertical(lipgloss.Left, header, body)
+
 	var separator string
 	var centerArea string
 	if g.sidebarOpen {
 		separator = strings.Repeat("═", l.gardenWidth) + "╦" + strings.Repeat("═", g.width-l.gardenWidth-1)
-		styledSidebar := lipgloss.NewStyle().Width(l.sidebarWidth-1).Height(l.sidebarHeight).Border(lipgloss.DoubleBorder(), false, false, false, true).BorderForeground(colorGray).Align(lipgloss.Right).Render(sideBar)
+		styledSidebar := lipgloss.NewStyle().Width(l.sidebarWidth-1).Height(l.sidebarHeight).Border(lipgloss.DoubleBorder(), false, false, false, true).BorderForeground(colorGray).Align(lipgloss.Right).Render(sidebar)
 		centerArea = lipgloss.JoinHorizontal(lipgloss.Top, styledGarden, styledSidebar)
 	} else {
 		separator = strings.Repeat("═", g.width)

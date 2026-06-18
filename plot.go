@@ -21,3 +21,7 @@ func (p plot) getGrowthVisual() rune {
 
 	return p.plant.growthRunes[index]
 }
+
+func (p plot) isOccupied() bool {
+	return p.plant != nil
+}
