@@ -76,13 +76,22 @@ func (g gardenModel) View() string {
 			gridBuilder.WriteString("\n")
 		}
 		for x := 0; x < len(g.gardenGrid[y]); x++ {
-			gridBuilder.WriteString("[" + string(g.gardenGrid[y][x].getGrowthVisual()) + "]")
+			currentPlant := g.gardenGrid[y][x]
+			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render("["))
+
+			if currentPlant.plant != nil {
+				gridBuilder.WriteString(lipgloss.NewStyle().Foreground(currentPlant.plant.color).Render(string(currentPlant.getGrowthVisual())))
+			} else {
+				gridBuilder.WriteString(lipgloss.NewStyle().Render(string(currentPlant.getGrowthVisual())))
+			}
+
+			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render("]"))
 		}
 	}
 
 	grid := gridBuilder.String()
 
-	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight).Align(lipgloss.Center, lipgloss.Center).Foreground(colorGrayGreen).Render(grid)
+	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
 	styledTopbar := lipgloss.NewStyle().Width(g.width).Align(lipgloss.Center).Render(topBar)
 
 	var separator string
