@@ -21,6 +21,12 @@ type gardenModel struct {
 func (g gardenModel) computeLayout() layout {
 	var sidebarWidth int
 
+	sidebarFullWidth := g.width / 5
+
+	if sidebarFullWidth < minSidebarWidth {
+		sidebarFullWidth = minSidebarWidth
+	}
+
 	if g.sidebarOpen {
 		sidebarWidth = sidebarFullWidth
 	}

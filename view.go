@@ -1,11 +1,11 @@
 package main
 
 const (
-	topbarHeight     = 2
-	sidebarFullWidth = 20
-	cellWidth        = 3
-	cellHeight       = 1
-	gutterWidth      = 12
+	topbarHeight    = 2
+	minSidebarWidth = 20
+	cellWidth       = 3
+	cellHeight      = 1
+	gutterWidth     = 12
 )
 
 type layout struct {
