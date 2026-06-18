@@ -49,5 +49,11 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 		}
 		grid = append(grid, row)
 	}
-	return model{gardenGrid: grid, sidebarOpen: false, currentTime: time.Now()}, []tea.ProgramOption{tea.WithAltScreen(), tea.WithMouseAllMotion()}
+	return model{
+		currentScreen: titleScreen,
+		garden: gardenModel{
+			gardenGrid:  grid,
+			currentTime: time.Now(),
+		},
+	}, []tea.ProgramOption{tea.WithAltScreen(), tea.WithMouseAllMotion()}
 }

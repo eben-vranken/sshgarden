@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -14,45 +12,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "ctrl+z":
 			return m, tea.Suspend
-		case "s":
-			m.currentScreen = gardenScreen
 		}
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-
-	case tea.MouseMsg:
-		if m.currentScreen != gardenScreen {
-			break
-		}
-
-		switch msg.Action {
-		case tea.MouseActionMotion:
-			m.mousePosition, _ = m.cellAt(msg.X, msg.Y)
-		case tea.MouseActionPress:
-			if msg.Button == tea.MouseButtonLeft {
-				if m.sidebarOpen && msg.X == m.width-1 && msg.Y == topbarHeight {
-					m.sidebarOpen = false
-				} else if cell, ok := m.cellAt(msg.X, msg.Y); ok {
-					m.sidebarOpen = true
-					m.selectedPlot = cell
-				}
-			}
-		}
+		m.width, m.height = msg.Width, msg.Height
+		m.title.width, m.title.height = msg.Width, msg.Height
+		m.garden.width, m.garden.height = msg.Width, msg.Height
+		return m, nil
+	case switchToGardenMsg:
+		m.currentScreen = gardenScreen
+		return m, nil
 	case tickMsg:
-		m.currentTime = time.Time(msg)
-		return m, tick()
+		var cmd tea.Cmd
+		m.garden, cmd = m.garden.Update(msg)
+		return m, cmd
 	}
 
-	return m, nil
-}
-
-func (m model) cellAt(px, py int) (coordinate, bool) {
-	l := m.computeLayout()
-	col := (px - l.gridStartX) / cellWidth
-	row := (py - l.gridStartY) / cellHeight
-
-	inbounds := (px >= l.gridStartX && py >= l.gridStartY) && (col >= 0 && col < len(m.gardenGrid[0]) && row >= 0 && row < len(m.gardenGrid))
-
-	return coordinate{x: col, y: row}, inbounds
+	var cmd tea.Cmd
+	switch m.currentScreen {
+	case titleScreen:
+		m.title, cmd = m.title.Update(msg)
+	case gardenScreen:
+		m.garden, cmd = m.garden.Update(msg)
+	}
+	return m, cmd
 }

@@ -15,11 +15,8 @@ type model struct {
 	width         int
 	height        int
 	currentScreen screen
-	gardenGrid    [][]rune
-	mousePosition coordinate
-	sidebarOpen   bool
-	selectedPlot  coordinate
-	currentTime   time.Time
+	title         titleModel
+	garden        gardenModel
 }
 
 type tickMsg time.Time
@@ -38,5 +35,5 @@ const (
 )
 
 func (m model) Init() tea.Cmd {
-	return tick()
+	return tea.Batch(m.title.Init(), m.garden.Init())
 }
