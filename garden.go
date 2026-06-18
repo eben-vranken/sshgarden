@@ -11,7 +11,7 @@ import (
 type gardenModel struct {
 	width         int
 	height        int
-	gardenGrid    [][]rune
+	gardenGrid    [][]plot
 	mousePosition coordinate
 	sidebarOpen   bool
 	selectedPlot  coordinate
@@ -76,7 +76,7 @@ func (g gardenModel) View() string {
 			gridBuilder.WriteString("\n")
 		}
 		for x := 0; x < len(g.gardenGrid[y]); x++ {
-			gridBuilder.WriteString("[" + string(g.gardenGrid[y][x]) + "]")
+			gridBuilder.WriteString("[" + string(g.gardenGrid[y][x].getGrowthVisual()) + "]")
 		}
 	}
 

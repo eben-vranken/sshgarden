@@ -41,11 +41,13 @@ func main() {
 }
 
 func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
-	grid := [][]rune{}
+	grid := [][]plot{}
 	for range 5 {
-		row := []rune{}
+		row := []plot{}
 		for range 5 {
-			row = append(row, ' ')
+			row = append(row, plot{
+				plant: nil,
+			})
 		}
 		grid = append(grid, row)
 	}
