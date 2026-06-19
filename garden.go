@@ -66,11 +66,11 @@ func (g gardenModel) View() string {
 
 	for y := 0; y < len(g.gardenGrid); y++ {
 		if y > 0 {
-			gridBuilder.WriteString("\n")
+			gridBuilder.WriteString("\n\n")
 		}
 		for x := 0; x < len(g.gardenGrid[y]); x++ {
 			currentPlant := g.gardenGrid[y][x]
-			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render("["))
+			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render(" ["))
 
 			if currentPlant.plant != nil {
 				gridBuilder.WriteString(lipgloss.NewStyle().Foreground(currentPlant.plant.color).Render(string(currentPlant.getGrowthVisual())))
@@ -78,7 +78,7 @@ func (g gardenModel) View() string {
 				gridBuilder.WriteString(lipgloss.NewStyle().Render(string(currentPlant.getGrowthVisual())))
 			}
 
-			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render("]"))
+			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render("] "))
 		}
 	}
 
