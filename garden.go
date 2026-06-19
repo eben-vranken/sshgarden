@@ -85,7 +85,16 @@ func (g gardenModel) View() string {
 	grid := gridBuilder.String()
 
 	// Bottom bar
-	bottomBar := lipgloss.NewStyle().Width(g.width).Height(bottomBarHeight-1).Align(lipgloss.Center).Border(lipgloss.DoubleBorder(), true, false, false, false).Render("")
+	totalInner := g.width - 8
+	btnW := totalInner / 4
+	lastBtnW := totalInner - 3*btnW
+	btnH := bottomBarHeight - 1
+	plantButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Render("Plant")
+	waterButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Render("Water")
+	harvestButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Render("Harvest")
+	shopButton := lipgloss.NewStyle().Width(lastBtnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Render("Shop")
+
+	bottomBar := lipgloss.JoinHorizontal(lipgloss.Center, plantButton, waterButton, harvestButton, shopButton)
 
 	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
 	styledTopbar := lipgloss.NewStyle().Width(g.width).Align(lipgloss.Center).Border(lipgloss.DoubleBorder(), false, false, true, false).Render(topBar)

@@ -5,7 +5,7 @@ const (
 	cellWidth       = 3
 	cellHeight      = 1
 	gutterWidth     = 12
-	bottomBarHeight = 7
+	bottomBarHeight = 6
 )
 
 type layout struct {
