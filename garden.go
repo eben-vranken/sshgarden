@@ -13,37 +13,32 @@ type gardenModel struct {
 	height        int
 	gardenGrid    [][]plot
 	mousePosition coordinate
-	sidebarOpen   bool
 	selectedPlot  coordinate
 	currentTime   time.Time
+	activeAction  action
 }
 
+type action int
+
+const (
+	actionNone action = iota
+	actionPlant
+	actionWater
+	actionHarvest
+	actionShop
+)
+
 func (g gardenModel) computeLayout() layout {
-	var sidebarWidth int
-
-	sidebarFullWidth := g.width / 5
-
-	if sidebarFullWidth < minSidebarWidth {
-		sidebarFullWidth = minSidebarWidth
-	}
-
-	if g.sidebarOpen {
-		sidebarWidth = sidebarFullWidth
-	}
-
-	gardenWidth := g.width - sidebarWidth
-	gardenHeight := g.height - topbarHeight
-	sidebarHeight := g.height - topbarHeight
+	gardenWidth := g.width
+	gardenHeight := g.height - topbarHeight - bottomBarHeight
 	gridStartX := (gardenWidth - len(g.gardenGrid[0])*cellWidth) / 2
 	gridStartY := topbarHeight + (gardenHeight-len(g.gardenGrid)*cellHeight)/2
 
 	return layout{
-		sidebarWidth:  sidebarWidth,
-		gardenWidth:   gardenWidth,
-		gardenHeight:  gardenHeight,
-		sidebarHeight: sidebarHeight,
-		gridStartX:    gridStartX,
-		gridStartY:    gridStartY,
+		gardenWidth:  gardenWidth,
+		gardenHeight: gardenHeight,
+		gridStartX:   gridStartX,
+		gridStartY:   gridStartY,
 	}
 }
 
@@ -89,28 +84,13 @@ func (g gardenModel) View() string {
 
 	grid := gridBuilder.String()
 
+	// Bottom bar
+	bottomBar := lipgloss.NewStyle().Width(g.width).Height(bottomBarHeight-1).Align(lipgloss.Center).Border(lipgloss.DoubleBorder(), true, false, false, false).Render("")
+
 	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
-	styledTopbar := lipgloss.NewStyle().Width(g.width).Align(lipgloss.Center).Render(topBar)
+	styledTopbar := lipgloss.NewStyle().Width(g.width).Align(lipgloss.Center).Border(lipgloss.DoubleBorder(), false, false, true, false).Render(topBar)
 
-	header := lipgloss.NewStyle().Width(l.sidebarWidth - 1).Align(lipgloss.Right).Foreground(colorRedOrange).Bold(true).Render("X")
-	body := lipgloss.NewStyle().Foreground(colorBeige).Render(g.renderSidebarBody())
-
-	sidebar := lipgloss.JoinVertical(lipgloss.Left, header, body)
-
-	var separator string
-	var centerArea string
-	if g.sidebarOpen {
-		separator = strings.Repeat("═", l.gardenWidth) + "╦" + strings.Repeat("═", g.width-l.gardenWidth-1)
-		styledSidebar := lipgloss.NewStyle().Width(l.sidebarWidth-1).Height(l.sidebarHeight).Border(lipgloss.DoubleBorder(), false, false, false, true).BorderForeground(colorGray).Align(lipgloss.Right).Render(sidebar)
-		centerArea = lipgloss.JoinHorizontal(lipgloss.Top, styledGarden, styledSidebar)
-	} else {
-		separator = strings.Repeat("═", g.width)
-		centerArea = styledGarden
-	}
-
-	separator = lipgloss.NewStyle().Foreground(colorGray).Render(separator)
-
-	return lipgloss.JoinVertical(lipgloss.Left, styledTopbar, separator, centerArea)
+	return lipgloss.JoinVertical(lipgloss.Left, styledTopbar, styledGarden, bottomBar)
 }
 
 func (g gardenModel) Update(msg tea.Msg) (gardenModel, tea.Cmd) {
@@ -122,12 +102,7 @@ func (g gardenModel) Update(msg tea.Msg) (gardenModel, tea.Cmd) {
 			g.mousePosition, _ = g.cellAt(msg.X, msg.Y)
 		case tea.MouseActionPress:
 			if msg.Button == tea.MouseButtonLeft {
-				if g.sidebarOpen && msg.X == g.width-1 && msg.Y == topbarHeight {
-					g.sidebarOpen = false
-				} else if cell, ok := g.cellAt(msg.X, msg.Y); ok {
-					g.sidebarOpen = true
-					g.selectedPlot = cell
-				}
+				// Click
 			}
 		}
 	case tickMsg:

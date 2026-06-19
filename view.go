@@ -2,19 +2,17 @@ package main
 
 const (
 	topbarHeight    = 2
-	minSidebarWidth = 20
 	cellWidth       = 3
 	cellHeight      = 1
 	gutterWidth     = 12
+	bottomBarHeight = 7
 )
 
 type layout struct {
-	sidebarWidth  int
-	gardenWidth   int
-	gardenHeight  int
-	sidebarHeight int
-	gridStartX    int
-	gridStartY    int
+	gardenWidth  int
+	gardenHeight int
+	gridStartX   int
+	gridStartY   int
 }
 
 func (m model) View() string {
