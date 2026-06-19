@@ -89,14 +89,14 @@ func (g gardenModel) View() string {
 	btnW := totalInner / 4
 	lastBtnW := totalInner - 3*btnW
 	btnH := bottomBarHeight - 1
-	plantButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Render("Plant")
-	waterButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Render("Water")
-	harvestButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Render("Harvest")
-	shopButton := lipgloss.NewStyle().Width(lastBtnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Render("Shop")
+	plantButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Foreground(colorLightGreen).BorderForeground(colorLightGreen).Bold(true).Render("Plant")
+	waterButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Foreground(colorLightBlue).BorderForeground(colorLightBlue).Bold(true).Render("Water")
+	harvestButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Foreground(colorRedOrange).BorderForeground(colorRedOrange).Bold(true).Render("Harvest")
+	shopButton := lipgloss.NewStyle().Width(lastBtnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Foreground(colorYellow).BorderForeground(colorYellow).Bold(true).Render("Shop")
 
 	bottomBar := lipgloss.JoinHorizontal(lipgloss.Center, plantButton, waterButton, harvestButton, shopButton)
 
-	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
+	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight-2).Align(lipgloss.Center, lipgloss.Center).Render(grid)
 	styledTopbar := lipgloss.NewStyle().Width(g.width).Align(lipgloss.Center).Border(lipgloss.DoubleBorder(), false, false, true, false).Render(topBar)
 
 	return lipgloss.JoinVertical(lipgloss.Left, styledTopbar, styledGarden, bottomBar)
