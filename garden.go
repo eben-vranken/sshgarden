@@ -96,7 +96,7 @@ func (g gardenModel) View() string {
 
 	bottomBar := lipgloss.JoinHorizontal(lipgloss.Center, plantButton, waterButton, harvestButton, shopButton)
 
-	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight-2).Align(lipgloss.Center, lipgloss.Center).Render(grid)
+	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
 	styledTopbar := lipgloss.NewStyle().Width(g.width).Align(lipgloss.Center).Border(lipgloss.DoubleBorder(), false, false, true, false).Render(topBar)
 
 	return lipgloss.JoinVertical(lipgloss.Left, styledTopbar, styledGarden, bottomBar)
