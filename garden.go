@@ -89,10 +89,10 @@ func (g gardenModel) View() string {
 	btnW := totalInner / 4
 	lastBtnW := totalInner - 3*btnW
 	btnH := bottomBarHeight - 1
-	plantButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Foreground(colorLightGreen).BorderForeground(colorLightGreen).Bold(true).Render("Plant")
-	waterButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Foreground(colorLightBlue).BorderForeground(colorLightBlue).Bold(true).Render("Water")
-	harvestButton := lipgloss.NewStyle().Width(btnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Foreground(colorRedOrange).BorderForeground(colorRedOrange).Bold(true).Render("Harvest")
-	shopButton := lipgloss.NewStyle().Width(lastBtnW).Height(btnH).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.DoubleBorder()).Foreground(colorYellow).BorderForeground(colorYellow).Bold(true).Render("Shop")
+	plantButton := g.makeButton("Plant", btnW, btnH, actionPlant, colorLightGreen)
+	waterButton := g.makeButton("Water", btnW, btnH, actionWater, colorLightBlue)
+	harvestButton := g.makeButton("Harvest", btnW, btnH, actionHarvest, colorRedOrange)
+	shopButton := g.makeButton("Shop", lastBtnW, btnH, actionShop, colorYellow)
 
 	bottomBar := lipgloss.JoinHorizontal(lipgloss.Center, plantButton, waterButton, harvestButton, shopButton)
 
@@ -111,7 +111,14 @@ func (g gardenModel) Update(msg tea.Msg) (gardenModel, tea.Cmd) {
 			g.mousePosition, _ = g.cellAt(msg.X, msg.Y)
 		case tea.MouseActionPress:
 			if msg.Button == tea.MouseButtonLeft {
-				// Click
+				// Bottom bar click
+				if msg.Y >= g.height-(bottomBarHeight) {
+					if g.activeAction == g.buttonAt(msg.X) {
+						g.activeAction = actionNone
+					} else {
+						g.activeAction = g.buttonAt(msg.X)
+					}
+				}
 			}
 		}
 	case tickMsg:
@@ -124,4 +131,26 @@ func (g gardenModel) Update(msg tea.Msg) (gardenModel, tea.Cmd) {
 
 func (g gardenModel) Init() tea.Cmd {
 	return tick()
+}
+
+func (g gardenModel) buttonAt(x int) action {
+	return action(x/((g.width-8)/4)) + 1
+}
+
+func (g gardenModel) makeButton(text string, width, height int, thisAction action, color lipgloss.Color) string {
+	style := lipgloss.NewStyle().
+		Width(width).
+		Height(height).
+		Align(lipgloss.Center, lipgloss.Center).
+		Border(lipgloss.DoubleBorder()).
+		BorderForeground(color).
+		Bold(true)
+
+	if g.activeAction == thisAction {
+		style = style.Background(color).Foreground(colorBlack)
+	} else {
+		style = style.Foreground(color)
+	}
+
+	return style.Render(text)
 }
