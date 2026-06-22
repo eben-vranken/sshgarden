@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -146,17 +145,12 @@ func (g gardenModel) Update(msg tea.Msg) (gardenModel, tea.Cmd) {
 					// Plot click
 					cel, ok := g.cellAt(msg.X, msg.Y)
 
-					fmt.Print(ok)
-
 					if ok {
 						g.selectedPlot = cel
-						fmt.Print("Valid cell!")
 
 						if g.activeAction == actionPlant {
 							g.gardenGrid[cel.y][cel.x].plant = plantRegistry["carrot"]
 							g.gardenGrid[cel.y][cel.x].seededAt = time.Now()
-
-							fmt.Print("Trying to plant")
 						}
 					}
 				}
