@@ -18,9 +18,9 @@ type plant struct {
 var plantRegistry = map[string]*plant{
 	"carrot": {
 		name:             "Carrot",
-		growthTime:       time.Second * 20,
-		waterRequirement: time.Second * 10,
-		thirstTolerance:  time.Second * 5,
+		growthTime:       time.Minute * 10,
+		waterRequirement: time.Minute * 5,
+		thirstTolerance:  time.Minute * 2,
 		growthRunes:      []rune{'.', ',', 'i', 'Y'},
 		color:            colorRedOrange,
 	},
