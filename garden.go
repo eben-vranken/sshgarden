@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -29,10 +30,16 @@ const (
 )
 
 func (g gardenModel) computeLayout() layout {
+	actualTopHeight := topbarHeight + 1
+
+	actualBotHeight := bottomBarHeight + 1
+
 	gardenWidth := g.width
-	gardenHeight := g.height - topbarHeight - bottomBarHeight
+
+	gardenHeight := g.height - actualTopHeight - actualBotHeight
+
 	gridStartX := (gardenWidth - len(g.gardenGrid[0])*cellWidth) / 2
-	gridStartY := topbarHeight + (gardenHeight-len(g.gardenGrid)*cellHeight)/2
+	gridStartY := actualTopHeight + (gardenHeight-len(g.gardenGrid)*cellHeight)/2
 
 	return layout{
 		gardenWidth:  gardenWidth,
@@ -66,11 +73,11 @@ func (g gardenModel) View() string {
 
 	for y := 0; y < len(g.gardenGrid); y++ {
 		if y > 0 {
-			gridBuilder.WriteString("\n\n")
+			gridBuilder.WriteString("\n")
 		}
 		for x := 0; x < len(g.gardenGrid[y]); x++ {
 			currentPlant := g.gardenGrid[y][x]
-			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render(" ["))
+			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render("["))
 
 			if currentPlant.plant != nil {
 				gridBuilder.WriteString(lipgloss.NewStyle().Foreground(currentPlant.plant.color).Render(string(currentPlant.getGrowthVisual())))
@@ -78,7 +85,7 @@ func (g gardenModel) View() string {
 				gridBuilder.WriteString(lipgloss.NewStyle().Render(string(currentPlant.getGrowthVisual())))
 			}
 
-			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render("] "))
+			gridBuilder.WriteString(lipgloss.NewStyle().Foreground(colorGrayGreen).Render("]"))
 		}
 	}
 
@@ -96,8 +103,25 @@ func (g gardenModel) View() string {
 
 	bottomBar := lipgloss.JoinHorizontal(lipgloss.Center, plantButton, waterButton, harvestButton, shopButton)
 
-	styledGarden := lipgloss.NewStyle().Width(l.gardenWidth).Height(l.gardenHeight).Align(lipgloss.Center, lipgloss.Center).Render(grid)
-	styledTopbar := lipgloss.NewStyle().Width(g.width).Align(lipgloss.Center).Border(lipgloss.DoubleBorder(), false, false, true, false).Render(topBar)
+	styledTopbar := lipgloss.NewStyle().
+		Width(g.width).
+		Align(lipgloss.Center).
+		Border(lipgloss.DoubleBorder(), false, false, true, false).
+		Render(topBar)
+
+	actualTopbarHeight := lipgloss.Height(styledTopbar)
+
+	topPadding := l.gridStartY - actualTopbarHeight
+	if topPadding < 0 {
+		topPadding = 0
+	}
+
+	styledGarden := lipgloss.NewStyle().
+		Width(l.gardenWidth).
+		Height(l.gardenHeight).
+		PaddingLeft(l.gridStartX).
+		PaddingTop(topPadding).
+		Render(grid)
 
 	return lipgloss.JoinVertical(lipgloss.Left, styledTopbar, styledGarden, bottomBar)
 }
@@ -112,11 +136,28 @@ func (g gardenModel) Update(msg tea.Msg) (gardenModel, tea.Cmd) {
 		case tea.MouseActionPress:
 			if msg.Button == tea.MouseButtonLeft {
 				// Bottom bar click
-				if msg.Y >= g.height-(bottomBarHeight) {
+				if msg.Y >= g.height-(bottomBarHeight+2) {
 					if g.activeAction == g.buttonAt(msg.X) {
 						g.activeAction = actionNone
 					} else {
 						g.activeAction = g.buttonAt(msg.X)
+					}
+				} else {
+					// Plot click
+					cel, ok := g.cellAt(msg.X, msg.Y)
+
+					fmt.Print(ok)
+
+					if ok {
+						g.selectedPlot = cel
+						fmt.Print("Valid cell!")
+
+						if g.activeAction == actionPlant {
+							g.gardenGrid[cel.y][cel.x].plant = plantRegistry["carrot"]
+							g.gardenGrid[cel.y][cel.x].seededAt = time.Now()
+
+							fmt.Print("Trying to plant")
+						}
 					}
 				}
 			}
